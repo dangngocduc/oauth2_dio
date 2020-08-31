@@ -1,14 +1,29 @@
 # oauth2_dio
 
-A new Flutter package.
+## Implement
 
-## Getting Started
+### 1, _OAuthInfoMixin_
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+Object hold info (token, refreshToken) is a mixin of OAuthInfoMixin
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+### 2, Create _Oauth2Interceptor_
+```
+    _oauth2manager = Oauth2Manager<SignInResponse>(
+        currentValue: token,
+        onSave: (value) {
+          //TODO Save token to SharePreference
+        });
+        
+    _dio.interceptors.add(
+      Oauth2Interceptor(
+        dio: _dio,
+        oauth2Dio:
+            Dio(BaseOptions(baseUrl: 'http://abc.xyz/api/')),
+        pathRefreshToken: 'auth/refreshToken',
+        parserJson: (json) {
+          //TODO Parser json to object which a mixin of OAuthInfoMixin
+        },
+        tokenProvider: _oauth2manager,
+      ),
+    );
+```

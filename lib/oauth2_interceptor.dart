@@ -55,6 +55,7 @@ class Oauth2Interceptor extends Interceptor {
         tokenProvider.add(parserJson(value.data));
         options.headers["Authorization"] = 'Bearer ${tokenProvider?.currentValue?.accessToken}';
       }, onError: (error) {
+        developer.log('onError: ${error}', name: TAG);
         tokenProvider.add(null);
       }).whenComplete((){
         //region unlock when refresh done

@@ -31,7 +31,6 @@ class Oauth2Manager<OAuthInfoMixin> {
 }
 
 mixin OAuthInfoMixin {
-
   get accessToken;
 
   get refreshToken;

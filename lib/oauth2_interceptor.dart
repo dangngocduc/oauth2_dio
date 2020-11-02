@@ -1,10 +1,12 @@
-import 'package:flutter/foundation.dart';
-import 'package:oauth2_dio/oauth2_manager.dart';
-import 'package:dio/dio.dart';
-import 'refresh_exception.dart';
 import 'dart:developer' as developer;
 
-typedef OAuthInfoMixinParse =  OAuthInfoMixin Function(Map map);
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:oauth2_dio/oauth2_manager.dart';
+
+import 'refresh_exception.dart';
+
+typedef OAuthInfoMixinParse = OAuthInfoMixin Function(Map map);
 
 class Oauth2Interceptor extends Interceptor {
   static const TAG = 'Oauth2Interceptor';
@@ -27,7 +29,8 @@ class Oauth2Interceptor extends Interceptor {
 
   @override
   Future onRequest(RequestOptions options) {
-    options.headers.putIfAbsent('Authorization', () => 'Bearer ${tokenProvider?.currentValue?.accessToken}');
+    options.headers.putIfAbsent('Authorization',
+        () => 'Bearer ${tokenProvider?.currentValue?.accessToken}');
     return super.onRequest(options);
   }
 
@@ -41,8 +44,10 @@ class Oauth2Interceptor extends Interceptor {
     if (error.response?.statusCode == 401) {
       developer.log('onError 401 [$error]', name: TAG);
       RequestOptions options = error.response.request;
-      if ('Bearer ${tokenProvider?.currentValue?.accessToken}' != options.headers["Authorization"]) {
-        options.headers["Authorization"] = 'Bearer ${tokenProvider?.currentValue?.accessToken}';
+      if ('Bearer ${tokenProvider?.currentValue?.accessToken}' !=
+          options.headers["Authorization"]) {
+        options.headers["Authorization"] =
+            'Bearer ${tokenProvider?.currentValue?.accessToken}';
         return dio.request(options.path, options: options);
       }
       //region lock current Dio
@@ -50,20 +55,22 @@ class Oauth2Interceptor extends Interceptor {
       dio.interceptors.responseLock.lock();
       dio.interceptors.errorLock.lock();
       //endregion
-      return oauth2Dio.post(pathRefreshToken, data: { keyRefreshToken: tokenProvider?.currentValue?.refreshToken})
-          .then((value) {
+      return oauth2Dio.post(pathRefreshToken, data: {
+        keyRefreshToken: tokenProvider?.currentValue?.refreshToken
+      }).then((value) {
         tokenProvider.add(parserJson(value.data));
-        options.headers["Authorization"] = 'Bearer ${tokenProvider?.currentValue?.accessToken}';
+        options.headers["Authorization"] =
+            'Bearer ${tokenProvider?.currentValue?.accessToken}';
       }, onError: (error) {
-        developer.log('onError: ${error}', name: TAG);
+        developer.log('onError: $error', name: TAG);
         tokenProvider.add(null);
-      }).whenComplete((){
+      }).whenComplete(() {
         //region unlock when refresh done
         dio.unlock();
         dio.interceptors.responseLock.unlock();
         dio.interceptors.errorLock.unlock();
         //endregion
-      }).then((value){
+      }).then((value) {
         if (tokenProvider.currentValue != null) {
           return dio.request(options.path, options: options);
         } else {
@@ -73,5 +80,4 @@ class Oauth2Interceptor extends Interceptor {
     }
     return super.onError(error);
   }
-
 }

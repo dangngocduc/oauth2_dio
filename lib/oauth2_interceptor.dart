@@ -41,7 +41,7 @@ class Oauth2Interceptor extends Interceptor {
 
   @override
   Future onError(DioError error) async {
-    if (error.response?.statusCode == 401) {
+    if (error.response?.statusCode == 401 && tokenProvider.currentValue != null) {
       developer.log('onError 401 [$error]', name: TAG);
       RequestOptions options = error.response.request;
       if ('Bearer ${tokenProvider?.currentValue?.accessToken}' !=

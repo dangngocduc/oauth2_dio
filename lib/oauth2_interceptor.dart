@@ -8,6 +8,8 @@ import 'refresh_exception.dart';
 
 typedef OAuthInfoMixinParse = OAuthInfoMixin Function(Map map);
 
+typedef ShouldRefresh = bool Function(Response map);
+
 class Oauth2Interceptor extends Interceptor {
   static const TAG = 'Oauth2Interceptor';
 
@@ -17,6 +19,7 @@ class Oauth2Interceptor extends Interceptor {
   String keyRefreshToken = 'refreshToken';
   Oauth2Manager<OAuthInfoMixin> tokenProvider;
   OAuthInfoMixinParse parserJson;
+  ShouldRefresh shouldRefresh;
 
   Oauth2Interceptor({
     @required this.dio,
@@ -24,6 +27,7 @@ class Oauth2Interceptor extends Interceptor {
     @required this.pathRefreshToken,
     @required this.tokenProvider,
     @required this.parserJson,
+    @required this.shouldRefresh,
     this.keyRefreshToken = 'refreshToken',
   });
 
@@ -36,6 +40,10 @@ class Oauth2Interceptor extends Interceptor {
 
   @override
   Future onResponse(Response response) async {
+    if (shouldRefresh != null && shouldRefresh(response)) {
+      response.statusCode = 401;
+      throw DioError(request: response.request, response: response);
+    }
     return super.onResponse(response);
   }
 

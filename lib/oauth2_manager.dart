@@ -6,11 +6,11 @@ import 'package:flutter/foundation.dart';
 class Oauth2Manager<OAuthInfoMixin> {
   static const TAG = 'Oauth2Manager';
 
-  OAuthInfoMixin currentValue;
+  OAuthInfoMixin? currentValue;
 
-  StreamController<OAuthInfoMixin> controller;
+  late StreamController<OAuthInfoMixin?> controller;
 
-  ValueChanged<OAuthInfoMixin> onSave;
+  ValueChanged<OAuthInfoMixin?>? onSave;
 
   Oauth2Manager({this.currentValue, this.onSave}) {
     controller = StreamController.broadcast();
@@ -19,9 +19,9 @@ class Oauth2Manager<OAuthInfoMixin> {
     });
   }
 
-  void add(OAuthInfoMixin event) {
+  void add(OAuthInfoMixin? event) {
     developer.log('add [event] : $event', name: TAG);
-    onSave(event);
+    onSave!(event);
     controller.add(event);
   }
 

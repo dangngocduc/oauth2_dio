@@ -1,18 +1,18 @@
 name: oauth2_dio
 description: A new Flutter package support oauth2 for refresh token.
-version: 1.0.2
+version: 2.0.2
 homepage: https://github.com/dangngocduc/oauth2_dio
 repository: https://github.com/dangngocduc/oauth2_dio
 issue_tracker: https://github.com/dangngocduc/oauth2_dio/issues
 documentation: https://github.com/dangngocduc/oauth2_dio
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  dio: ^3.0.9
+  dio: 4.0.0
 
 dev_dependencies:
   flutter_test:

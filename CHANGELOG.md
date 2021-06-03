@@ -17,3 +17,7 @@ upgrade Dart SDK constraints to >=2.12.0-0 <3.0.0
 # 2.0.2
 Fix:
 Handler next error
+
+# 2.0.3
+Fix:
+Handler refresh token failed

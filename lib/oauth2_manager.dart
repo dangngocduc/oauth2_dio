@@ -21,6 +21,7 @@ class Oauth2Manager<OAuthInfoMixin> {
 
   void add(OAuthInfoMixin? event) {
     developer.log('add [event] : $event', name: TAG);
+    currentValue = event;
     onSave!(event);
     controller.add(event);
   }

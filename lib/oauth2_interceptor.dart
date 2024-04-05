@@ -5,7 +5,7 @@ import 'package:oauth2_dio/oauth2_manager.dart';
 
 typedef OAuthInfoMixinParse = OAuthInfoMixin Function(Map map);
 
-class Oauth2Interceptor extends Interceptor {
+class Oauth2Interceptor extends QueuedInterceptorsWrapper {
   static const TAG = 'Oauth2Interceptor';
 
   Dio dio;
@@ -25,16 +25,16 @@ class Oauth2Interceptor extends Interceptor {
   });
 
   @override
-  void onRequest(RequestOptions options,
-      RequestInterceptorHandler handler) {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.headers.putIfAbsent('Authorization',
         () => 'Bearer ${tokenProvider.currentValue?.accessToken}');
     handler.next(options);
   }
 
   @override
-  void onError(DioError error, ErrorInterceptorHandler handler) async {
-    if (error.response?.statusCode == 401 && tokenProvider.currentValue != null) {
+  void onError(DioException error, ErrorInterceptorHandler handler) async {
+    if (error.response?.statusCode == 401 &&
+        tokenProvider.currentValue != null) {
       developer.log('onError 401 [$error]', name: TAG);
       RequestOptions options = error.response!.requestOptions;
       if ('Bearer ${tokenProvider.currentValue?.accessToken}' !=
@@ -48,10 +48,7 @@ class Oauth2Interceptor extends Interceptor {
         });
         return;
       }
-      //region lock current Dio
-      dio.lock();
-      dio.interceptors.responseLock.lock();
-      dio.interceptors.errorLock.lock();
+
       //endregion
       oauth2Dio.post(pathRefreshToken, data: {
         keyRefreshToken: tokenProvider.currentValue?.refreshToken
@@ -59,15 +56,9 @@ class Oauth2Interceptor extends Interceptor {
         tokenProvider.add(parserJson(value.data));
         options.headers["Authorization"] =
             'Bearer ${tokenProvider.currentValue?.accessToken}';
-      }, onError: (error){
+      }, onError: (error) {
         tokenProvider.add(null);
         handler.reject(error);
-      }).whenComplete(() {
-        //region unlock when refresh done
-        dio.unlock();
-        dio.interceptors.responseLock.unlock();
-        dio.interceptors.errorLock.unlock();
-        //endregion
       }).then((value) {
         dio.fetch(options).then((value) {
           handler.resolve(value);

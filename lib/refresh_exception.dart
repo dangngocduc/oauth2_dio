@@ -1,3 +1,3 @@
-class RefreshException with Exception {
+class RefreshException implements Exception {
   static const TAG = 'RefreshException';
 }
